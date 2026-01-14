@@ -1,28 +1,25 @@
-#Tested site: https://demowebshop.tricentis.com/
+# Tested site
+https://demowebshop.tricentis.com/
 
-#Check list - Registration :
+# Checklist — Registration
 
-##Negative scenarios :
+## Negative scenarios
 
--Registration without first name
--Registration without last name
--Registration without email
--Registration without password
--Register with all empty fields
--Register with invalid first name
--Register with invalid last name
--Register with invalid email
--Register with an already registered email
--Register with a password shorter than the minimum length
--Register with a password containing only the same symbols
--Use different passwords in the “Password” and “Confirm password” fields
--Verify registration error messages
+- Registration without first name  
+- Registration without last name  
+- Registration without email  
+- Registration without password  
+- Registration with all empty fields  
+- Registration with invalid first name  
+- Registration with invalid last name  
+- Registration with invalid email  
+- Registration with an already registered email  
+- Registration with a password shorter than the minimum length  
+- Registration with a password containing only the same symbols  
+- Registration with different values in the **Password** and **Confirm password** fields  
+- Verify registration error messages  
 
-##Positive scenarios :
+## Positive scenarios
 
--Register with all fields filled correctly
--Verify successful registration message
-
-
-
-
+- Registration with all fields filled correctly  
+- Verify successful registration message
