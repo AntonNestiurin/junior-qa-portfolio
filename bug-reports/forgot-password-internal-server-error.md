@@ -34,7 +34,8 @@ The user should remain on the Forgot Password page, and the system should displa
 
 ## Attachments
 - Screenshot of the error page
-<img width="1094" height="271" alt="image" src="https://github.com/user-attachments/assets/edf2dfb9-2089-4964-bd3c-ce5f6124b89a" />
 <img width="1202" height="458" alt="image" src="https://github.com/user-attachments/assets/62e02e55-d317-4c3c-a8d8-978e74952619" />
+<img width="1094" height="271" alt="image" src="https://github.com/user-attachments/assets/edf2dfb9-2089-4964-bd3c-ce5f6124b89a" />
+
 
 
