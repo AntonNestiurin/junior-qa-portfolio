@@ -1,0 +1,98 @@
+## Lab 5.1: Reflected XSS into HTML context with nothing encoded
+
+Lab URL: https://portswigger.net/academy/labs/launch/9e3414ee887ebaed9f7ed25b58dd639959bb28a3b926f53c831c1d86e03d8813?referrer=%2fweb-security%2fcross-site-scripting%2freflected%2flab-html-context-nothing-encoded
+
+Vulnerability: Reflected XSS (basic)
+
+Exploitation:
+1. Navigated to the search page.
+2. Searched for: test → saw "You searched for: test" in the response.
+3. Injected payload: <script>alert(1)</script>
+4. The payload was reflected back into the HTML without encoding.
+5. Browser executed JavaScript and showed alert(1).
+6. Lab banner turned green (solved).
+
+Why it worked:
+- User input was inserted directly into the HTML response.
+- No output encoding (e.g., no HTML entity encoding).
+- Browser interpreted `<script>` tag as code.
+
+Real-world impact:
+- Attacker can execute arbitrary JS in victim's browser.
+- Can steal cookies (if not HttpOnly), perform actions as victim, or inject phishing content.
+
+Basic remediation:
+- HTML-encode user input before reflecting it into HTML context.
+- Use a templating framework with auto-escaping.
+- Apply Content Security Policy (CSP) as a defense-in-depth measure.
+
+## Lab 5.2: Stored XSS into HTML context with nothing encoded
+
+Lab URL: https://portswigger.net/academy/labs/launch/09e0bee59e32e92a78e614589793110f95c397459ed0ab96a3dbaf100e3b7cde?referrer=%2fweb-security%2fcross-site-scripting%2fstored%2flab-html-context-nothing-encoded
+
+Vulnerability: Stored XSS (persistent)
+
+Exploitation:
+1. Opened a product page that had a comment form.
+2. Posted a comment with payload: <script>alert(1)</script>
+3. Reloaded the page.
+4. When the page loaded, the injected script executed and showed alert(1).
+5. The payload is now stored on the server and executes whenever the page is viewed.
+6. Lab banner turned green.
+
+Why it worked:
+- Application stores user input and later includes it in HTML without sanitization or encoding.
+- Stored payload is executed every time the page is rendered.
+- Any user viewing the page is affected (not just the attacker).
+
+Real-world impact:
+- Very serious on public-facing sites (forums, product reviews, comments).
+- Allows mass exploitation (all visitors to that page).
+- Attackers could:
+  - Steal session tokens (if not HttpOnly).
+  - Deface the page.
+  - Inject fake login forms to steal credentials.
+  - Install browser-based malware.
+
+Remediation:
+- HTML-encode user input before storing/displaying.
+- Validate input server-side (disallow script tags, event handlers).
+- Consider WAF rules to block obvious XSS payloads.
+- Use frameworks/template engines with built-in escaping.
+
+## Lab 5.3: [Exact lab name you used, e.g. "Password reset broken logic"]
+
+Lab URL: https://portswigger.net/academy/labs/launch/a2aa25c63138601f68030a53721c7e4e4f97843ee4d4fff8c485bce7f03ea087?referrer=%2fweb-security%2fauthentication%2fother-mechanisms%2flab-password-reset-broken-logic
+
+Vulnerability: Authentication logic flaw in password reset
+
+What the app does:
+- Provides "Forgot password?" flow.
+- Sends (or pretends to send) reset links for accounts.
+- Fails to properly verify account ownership during reset.
+
+Exploitation:
+1. Opened the password reset page.
+2. Triggered reset for my own account to observe the behavior.
+3. Captured the reset request in Burp
+4. Noticed that:
+   - The reset token or user identifier is exposed.
+   - The email/username can be changed in a second step.
+   - The reset endpoint accepts arbitrary username (carlos) without verifying email ownership.
+5. Modified the request in Burp to target user "carlos".
+6. Completed the reset process and set a new password for "carlos".
+7. Logged in as carlos with the new password.
+8. Lab solved.
+
+Why it worked:
+- The application trusts user-controlled data where it should validate ownership.
+
+Real-world impact:
+- Full account takeover of any user whose username/email is known.
+- Much worse than password guessing/brute force (no need to know current password).
+- High risk if applied to privileged accounts (e.g., admins).
+
+Remediation:
+- Bind reset tokens to specific user accounts.
+- Ensure the user being reset is the same one who requested it.
+- Make tokens unguessable, single-use, and short-lived.
