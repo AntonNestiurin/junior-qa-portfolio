@@ -1,0 +1,161 @@
+# PortSwigger Academy Labs – Day 4
+Platform: PortSwigger Web Security Academy  
+Focus Area: SQL Injection & Authentication Vulnerabilities  
+
+---
+
+## Lab 1: SQL Injection in WHERE Clause (Retrieving Hidden Data)
+
+Lab URL: https://portswigger.net/web-security/sql-injection/lab-retrieve-hidden-data  
+Vulnerability Type: SQL Injection  
+
+### Objective
+Exploit SQL injection in a product filter to retrieve hidden data.
+
+### Exploitation Steps
+1. Identified injection point:  
+   /filter?category=Clothing, shoes and accessories
+2. Tested single quote (') → application returned SQL error.
+3. Injected payload:  
+   `' OR 1=1--`  
+4. Successfully retrieved all products, including hidden entries.
+
+### Impact
+- Unauthorized data exposure.
+- Bypass of business logic filtering.
+- Potential access to sensitive database records.
+
+### Remediation
+- Use parameterized queries:
+  `cursor.execute("SELECT * FROM products WHERE category = ?", [category])`
+- Apply strict input validation (whitelist allowed categories).
+- Avoid dynamic SQL string concatenation.
+
+---
+
+## Lab 2: SQL Injection – Determining Number of Columns (UNION Attack Preparation)
+
+Lab URL: https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns  
+Vulnerability Type: SQL Injection (Reconnaissance Phase)
+
+### Objective
+Determine the number of columns required for a successful UNION-based attack.
+
+### Exploitation Steps
+
+**Method 1 – ORDER BY Enumeration**
+- `Gifts' ORDER BY 1--` → Success  
+- `Gifts' ORDER BY 2--` → Success  
+- `Gifts' ORDER BY 3--` → Success  
+- `Gifts' ORDER BY 4--` → Error  
+
+Conclusion: Query contains **3 columns**.
+
+**Method 2 – UNION SELECT NULL Verification**
+- `Gifts' UNION SELECT NULL--` → Error  
+- `Gifts' UNION SELECT NULL,NULL--` → Error  
+- `Gifts' UNION SELECT NULL,NULL,NULL--` → Success  
+
+Confirmed: **3 columns required**.
+
+### Why This Matters
+- UNION attacks require matching column count.
+- Column enumeration is the first step in UNION-based data extraction.
+- Incorrect column count results in query failure.
+
+### Remediation
+- Use parameterized queries.
+- Disable detailed SQL error messages.
+- Implement Web Application Firewall (WAF) filtering.
+
+---
+
+## Lab 3: Username Enumeration via Different Responses
+
+Lab URL: https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-different-responses  
+Vulnerability Type: Username Enumeration + Weak Authentication Controls
+
+### Objective
+Identify valid usernames and brute-force password via differential responses.
+
+### Exploitation Steps
+1. Observed different login error messages:
+   - "Invalid username"
+   - "Incorrect password"
+2. Used Burp Intruder with username wordlist.
+3. Identified valid username: `carlos` (different server response).
+4. Performed password brute-force attack.
+5. Successfully authenticated.
+
+### Root Cause
+- Information leakage via verbose error messages.
+- No rate limiting on login attempts.
+- Weak password policy.
+
+### Impact
+- Account takeover.
+- User enumeration (privacy risk).
+- Increased attack surface for brute-force attacks.
+
+Severity: MEDIUM–HIGH
+
+### Remediation
+- Use generic error message: "Invalid credentials".
+- Implement rate limiting and IP throttling.
+- Enforce strong password policies.
+- Introduce account lockout mechanism.
+- Optional: CAPTCHA after repeated failures.
+
+---
+
+## Lab 4: 2FA Simple Bypass (Workflow Vulnerability)
+
+Lab URL: https://portswigger.net/web-security/authentication/multi-factor/lab-2fa-simple-bypass  
+Vulnerability Type: Multi-Factor Authentication Bypass
+
+### Objective
+Bypass second authentication factor via workflow manipulation.
+
+### Exploitation Steps
+1. Logged in with valid credentials.
+2. Redirected to `/login2` (2FA verification page).
+3. Manually navigated to `/my-account`.
+4. Accessed account without completing 2FA.
+
+### Root Cause
+- Missing server-side verification of 2FA completion.
+- Application trusted session cookie without checking authentication stage.
+- Improper session state validation.
+
+### Impact
+- Complete bypass of multi-factor authentication.
+- High risk of account takeover.
+- MFA rendered ineffective.
+
+Severity: HIGH
+
+### Remediation
+- Store `2fa_verified = true` in session only after successful verification.
+- Validate 2FA status on every protected endpoint.
+- Enforce strict server-side authorization checks.
+- Avoid relying on client-side workflow enforcement.
+
+---
+
+## Daily Summary
+
+Labs Completed: 4  
+Primary Focus: SQL Injection, Authentication Security  
+Time Spent: ~2–3 hours  
+
+### Skills Practiced
+- Identifying SQL injection points.
+- Column enumeration techniques (ORDER BY / UNION).
+- Exploiting authentication logic flaws.
+- Using Burp Suite (Proxy, Intruder).
+- Understanding session and MFA workflow validation.
+
+---
+
+### Key Takeaway
+Even basic misconfigurations (error messages, missing session checks, improper query handling) can lead to critical security vulnerabilities. Secure coding practices and strict server-side validation are essential.
