@@ -1,0 +1,35 @@
+# Burp Intruder Test (Day 2)
+
+## Target Request:
+GET /artists.php?artist=§1§ HTTP/1.1
+
+## Payloads Tested:
+1, 2, 3, 10, 999, abc, -1
+
+## Results:
+| Payload | Status | Length | Notes |
+|--------|--------|--------|------|
+| 1 | 200 | ~6500 | Valid artist ID, full content returned |
+| 2 | 200 | ~6480 | Valid artist ID, different data |
+| 3 | 200 | ~6480 | Valid artist ID |
+| 10 | 200 | ~5030 | No matching artist, empty content |
+| 999 | 200 | ~5030 | No matching artist, empty content |
+| -1 | 200 | ~5030 | Invalid numeric ID, empty content |
+| abc | 200 | ~2320 | SQL error message returned |
+
+## Observations:
+- The application returns HTTP 200 OK for all inputs, including invalid ones
+- Different response lengths indicate different backend behavior
+- Valid numeric IDs return full artist content
+- Non-existing numeric IDs return an empty page without an error message
+- Non-numeric input ("abc") causes an SQL error to be displayed to the user
+- This suggests that user input is directly used in an SQL query without proper validation or sanitization
+
+## What I Learned:
+- Response length can be used as an indicator of backend behavior
+- HTTP status codes alone are not sufficient to detect errors
+- Lack of input validation can lead to SQL Injection vulnerabilities
+- Error messages returned by the database reveal internal implementation details
+- Burp Intruder is useful for quickly identifying anomalous responses
+- I learned how to identify abnormal responses using response length
+- I understood how SQL errors can confirm injection points
