@@ -1,0 +1,123 @@
+# PortSwigger Academy Labs - Day 4
+
+## Lab 1: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data
+
+**Lab URL:** https://portswigger.net/web-security/sql-injection/lab-retrieve-hidden-data
+
+**Vulnerability Type:** SQL Injection 
+
+**Exploitation Steps:**
+1. Identified injection point: /filter?category= Clothing, shoes and accessories
+2. Tested with single quote (') → confirmed SQLi
+3. Used OR 1=1 to retrieve all products
+
+**Remediation:**
+- Use parameterized queries: cursor.execute("SELECT * FROM products WHERE category = ?", [category])
+- Input validation (whitelist allowed categories)
+
+## Lab 2: SQL injection UNION attack, determining the number of columns
+
+**Lab URL:** https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns
+
+**Vulnerability Type:** SQL Injection (reconnaissance phase)
+
+**Exploitation Steps:**
+1. Identified injection point: /filter?category=Tech gifts
+2. Method 1 - ORDER BY:
+   - Gifts' ORDER BY 1-- → Success
+   - Gifts' ORDER BY 2-- → Success
+   - Gifts' ORDER BY 3-- → Success
+   - Gifts' ORDER BY 4-- → Error (column doesn't exist)
+   - Conclusion: 3 columns
+3. Method 2 - UNION SELECT NULL (verification):
+   - Gifts' UNION SELECT NULL-- → Error
+   - Gifts' UNION SELECT NULL,NULL-- → Error  
+   - Gifts' UNION SELECT NULL,NULL,NULL-- → Success 
+   - Confirmed: 3 columns
+
+**Why this matters:**
+- UNION attacks require matching column count
+- This is the FIRST step in UNION-based SQLi exploitation
+- Without knowing column count, you can't extract data
+
+**Next steps (for future labs):**
+- Determine data types of columns
+- Find which columns display in response
+- Extract data from other tables
+
+---
+
+## Summary:
+- Labs completed: 2
+- Vulnerability type: SQL Injection
+- Time spent: ~1.5 hours
+- Skills gained: 
+  - Identifying SQLi injection points
+  - Basic SQLi payloads (', OR 1=1, UNION)
+  - Column enumeration techniques
+
+
+## Lab 3: Username enumeration via different responses
+
+**Lab URL:** https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-different-responses
+
+**Vulnerability Type:** Username Enumeration + Weak Authentication
+
+**Exploitation Steps:**
+1. Login page reveals different error messages:
+   - "Invalid username" → username doesn't exist
+   - "Incorrect password" → username exists
+2. Used Burp Intruder to test username wordlist
+3. Identified valid username: carlos (different response)
+4. Brute forced password using Intruder with password wordlist
+5. Found password: [password from results]
+6. Logged in successfully
+
+**Why it worked:**
+- Different error messages leak information (username existence)
+- No rate limiting on login attempts
+- Weak/common password
+- Allows automated brute force
+
+**Real-world impact:**
+- Account takeover via brute force
+- User enumeration (privacy issue, GDPR concern)
+- Severity: MEDIUM-HIGH
+
+**Remediation:**
+- Generic error message: "Invalid credentials" (don't reveal if username or password is wrong)
+- Rate limiting (lock account after N failed attempts, IP-based throttling)
+- Strong password policy
+- Account lockout mechanism
+- CAPTCHA after failed attempts
+
+---
+
+## Lab 4: 2FA simple bypass
+
+**Lab URL:** https://portswigger.net/web-security/authentication/multi-factor/lab-2fa-simple-bypass
+
+**Vulnerability Type:** Multi-Factor Authentication Bypass (Workflow)
+
+**Exploitation Steps:**
+1. Logged in as victim (carlos:montoya) → Redirected to /login2 (2FA page)
+2. Instead of entering 2FA code, manually navigated to /my-account
+3. Successfully accessed account WITHOUT completing 2FA
+
+**Why it worked:**
+- Application doesn't verify 2FA was completed before granting access
+- /my-account page trusts that if you have a session cookie, you're fully authenticated
+- Missing authorization check: "Did user complete 2FA?"
+- Workflow bypass (skip step 2, go straight to step 3)
+
+**Real-world impact:**
+- MFA completely bypassable (renders MFA useless)
+- Account takeover even with 2FA enabled
+- Severity: HIGH
+
+**Remediation:**
+- Server-side check: Before loading /my-account, verify session has '2fa_verified: true' flag
+- Set flag ONLY after successful 2FA verification
+- Don't trust client-side navigation
+- Proper session state management
+
