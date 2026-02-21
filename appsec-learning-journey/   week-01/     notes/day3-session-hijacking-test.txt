@@ -1,0 +1,30 @@
+# Session Cookie Security Analysis – Test Server
+**Date:** 12.02.2026
+**Target:** Local Flask Server (http://127.0.0.1:5000)
+
+---
+
+## Session Cookie Analysis
+
+| Attribute | Value |
+|-----------|-------|
+| Cookie name | session |
+| Secure | NO (HTTP used) |
+| HttpOnly | YES (Flask default) |
+| SameSite | NO |
+
+### Identified Vulnerabilities
+1. Missing Secure flag → Cookie sent over HTTP, vulnerable to interception.
+2. Missing SameSite flag → CSRF possible.
+
+### Remediation
+- Run server with HTTPS or set `SESSION_COOKIE_SECURE = True`
+- Set `SESSION_COOKIE_SAMESITE = 'Lax'` or `'Strict'`
+
+---
+
+## Session Fixation Test
+- Session before login: aY3SOg.5KfTuTtiPG0X1CdoAzc7UbOZUSM
+- Session after login: aY3Wjw.ryup5HBbHRl4YQLHnJ-EpiCMeQM
+
+**Result:** Session ID changed after login → Protected against session fixation.
