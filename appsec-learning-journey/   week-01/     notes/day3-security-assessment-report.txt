@@ -1,0 +1,48 @@
+# Security Assessment: Test Web Application
+Date: 12.02.2026
+Tester: Anton Nestiurin
+Target: http://127.0.0.1:5000 (Local Flask server)
+
+## Executive Summary:
+Tested session management and cookie security. Found 2 issues.
+
+## Findings:
+
+### Finding 1: Missing Secure Flag on Session Cookie
+Severity: HIGH
+Description: Session cookie lacks Secure attribute.
+Impact: Cookie transmitted over HTTP, vulnerable to interception.
+Steps to Reproduce:
+1. Visit http://127.0.0.1:5000
+2. Login
+3. Observe Set-Cookie header lacks "Secure"
+Remediation: 
+- Use HTTPS
+- Or set: app.config['SESSION_COOKIE_SECURE'] = True
+
+### Finding 2: Missing SameSite Flag
+Severity: MEDIUM
+Description: Session cookie lacks SameSite attribute.
+Impact: Vulnerable to CSRF attacks.
+Remediation:
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+## Positive Findings:
+ HttpOnly flag present (protects against XSS)
+ Session regenerates after login (protects against fixation)
+
+## Risk Assessment:
+Overall: MEDIUM (due to HTTP usage, but this is a test environment)
+
+Visited GitHub
+
+Comparison: My Server vs. GitHub
+
+
+| Attribute | My Server | GitHub | Winner |
+|-----------|-----------|--------|--------|
+| Secure    | ❌        | ✅      | GitHub |
+| HttpOnly  | ✅        | ✅      | Tie ✅  |
+| SameSite  | ❌        | ✅      | GitHub |
+
+Lesson: Production sites implement all security flags. My test server needs improvement.
