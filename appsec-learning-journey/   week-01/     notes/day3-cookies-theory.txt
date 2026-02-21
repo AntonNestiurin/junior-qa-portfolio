@@ -1,0 +1,18 @@
+# Cookie Fundamentals (My Notes)
+
+## What is a cookie?
+Small data stored by browser, sent with every request to that domain
+
+## Why do cookies exist?
+HTTP is stateless, cookies let server "remember" you
+
+## Cookie structure:
+Set-Cookie: name=value; Path=/; Domain=example.com; Secure; HttpOnly; SameSite=Lax (or Strickt)
+
+## Security flags:
+1. Secure: Cookies only sent over HTTPS (not over HTTP). That lowers the risks of session hijacking and cookie interceptions.
+2. HttpOnly: JavaScript cannot read the cookie via document.cookie. Attacker cannot steal a session cookie. Is useful against XSS attacks.
+3. SameSite: Controls if cookies are sent in cross-site requests, like from another website. Values Strict and Lax reduce the risk of CSRF attacks (for example transfer manipulations).
+
+## Session management:
+As a user visits a website, the server creates a new session id for this user. This is needed for carts, language and other elements to function. After the user logs in, the session id is changed.
