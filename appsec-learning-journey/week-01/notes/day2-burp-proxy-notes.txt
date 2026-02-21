@@ -1,0 +1,26 @@
+# Burp Proxy Workflow (Day 2)
+
+## What is Burp Proxy?
+Burp Proxy is an app which is used to intercept, drop, modify and repeat http requests and responses between a client and a server.
+
+## Intercept ON vs OFF:
+- Intercept ON: after following the url link http requests are intercepted in  the app and will not move on until the user lets 
+- Intercept OFF: a site is loaded normally
+
+## HTTP History:
+- Purpose: used in order to see a list of requests in a chronological order, their methods and other params
+- How I use it: find the request I need in the list, click and then I choose what to do with it. Either study the request tab, change params or send it to intruder or repeater.
+
+## How to Send a Request to Repeater:
+1. Find a request you need in the Proxy Menu
+2. Right-click on it either in the HTTP history or in the request tab
+3. Choose send it to intruder
+
+## What I Tested Today:
+- Site: testphp.vulnweb.com
+- Request: GET /artists.php?artist=1
+
+Modifications I tried:
+Changed artist=1 to artist=2 → 200 OK, full page returned with different artist data
+Changed to artist=999 → 200 OK, shorter response, page rendered without artist data
+Changed to artist=abc → 200 OK, significantly shorter response, indicating invalid input handling
